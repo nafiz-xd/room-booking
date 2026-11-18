@@ -20,7 +20,8 @@
   .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
   .card { background:#0f2d42; border:1px solid #1c4a68; border-radius:14px; overflow:hidden; transition:transform .15s, border-color .15s; }
   .card:hover { transform:translateY(-4px); border-color:#38bdf8; }
-  .thumb { font-size:64px; text-align:center; padding:22px 0 14px; background:linear-gradient(160deg,#123a54,#0a1f2e); }
+  .thumb { height:190px; background:linear-gradient(160deg,#123a54,#0a1f2e); }
+  .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
   .body { padding:16px 18px 18px; }
   .body h3 { font-size:18px; }
   .meta { color:#7dd3fc; font-size:13px; margin:4px 0 8px; }
@@ -91,14 +92,14 @@
 
 <script>
   const ROOMS = [
-    { id: 1, name: 'Deluxe AC Room', type: 'AC', price: 3200, cap: 2, rating: 4.8, emoji: '🛏️', amen: ['AC', 'WiFi', 'TV', 'Sea view', 'Breakfast'] },
-    { id: 2, name: 'Standard Non-AC Room', type: 'Non-AC', price: 1500, cap: 2, rating: 4.3, emoji: '🛏️', amen: ['Fan', 'WiFi', 'TV'] },
-    { id: 3, name: 'Family AC Room', type: 'Family', price: 4800, cap: 5, rating: 4.9, emoji: '👨‍👩‍👧‍👦', amen: ['AC', 'WiFi', 'TV', '2 beds', 'Breakfast', 'Sea view'] },
-    { id: 4, name: 'Couple AC Room', type: 'AC', price: 2600, cap: 2, rating: 4.6, emoji: '💑', amen: ['AC', 'WiFi', 'TV', 'Balcony'] },
-    { id: 5, name: 'Budget Non-AC Room', type: 'Non-AC', price: 1000, cap: 1, rating: 4.1, emoji: '🛏️', amen: ['Fan', 'WiFi'] },
-    { id: 6, name: 'Premium Suite', type: 'Suite', price: 7500, cap: 4, rating: 5.0, emoji: '👑', amen: ['AC', 'WiFi', 'TV', 'Sea view', 'Breakfast', 'Living room', 'Bathtub'] },
-    { id: 7, name: 'Family Non-AC Room', type: 'Family', price: 2800, cap: 6, rating: 4.4, emoji: '👨‍👩‍👧‍👦', amen: ['Fan', 'WiFi', 'TV', '2 beds'] },
-    { id: 8, name: 'Twin AC Room', type: 'AC', price: 3400, cap: 3, rating: 4.7, emoji: '🛏️', amen: ['AC', 'WiFi', 'TV', '2 beds', 'Breakfast'] }
+    { id: 1, name: 'Deluxe AC Room', type: 'AC', price: 3200, cap: 2, rating: 4.8, img: 'images/deluxe.jpg', amen: ['AC', 'WiFi', 'TV', 'Sea view', 'Breakfast'] },
+    { id: 2, name: 'Standard Non-AC Room', type: 'Non-AC', price: 1500, cap: 2, rating: 4.3, img: 'images/standard.jpg', amen: ['Fan', 'WiFi', 'TV'] },
+    { id: 3, name: 'Family AC Room', type: 'Family', price: 4800, cap: 5, rating: 4.9, img: 'images/familyac.jpg', amen: ['AC', 'WiFi', 'TV', '2 beds', 'Breakfast', 'Sea view'] },
+    { id: 4, name: 'Couple AC Room', type: 'AC', price: 2600, cap: 2, rating: 4.6, img: 'images/couple.jpg', amen: ['AC', 'WiFi', 'TV', 'Balcony'] },
+    { id: 5, name: 'Budget Non-AC Room', type: 'Non-AC', price: 1000, cap: 1, rating: 4.1, img: 'images/budget.jpg', amen: ['Fan', 'WiFi'] },
+    { id: 6, name: 'Premium Suite', type: 'Suite', price: 7500, cap: 4, rating: 5.0, img: 'images/suite.jpg', amen: ['AC', 'WiFi', 'TV', 'Sea view', 'Breakfast', 'Living room', 'Bathtub'] },
+    { id: 7, name: 'Family Non-AC Room', type: 'Family', price: 2800, cap: 6, rating: 4.4, img: 'images/family2.jpg', amen: ['Fan', 'WiFi', 'TV', '2 beds'] },
+    { id: 8, name: 'Twin AC Room', type: 'AC', price: 3400, cap: 3, rating: 4.7, img: 'images/twin.jpg', amen: ['AC', 'WiFi', 'TV', '2 beds', 'Breakfast'] }
   ];
   const fmt = n => '৳' + n.toLocaleString('en-IN');
   const today = new Date();
@@ -136,7 +137,7 @@
     else list.sort((a, b) => b.rating - a.rating);
     document.getElementById('grid').innerHTML = list.length ? list.map(r => {
       const p = priceFor(r);
-      return `<div class="card"><div class="thumb">${r.emoji}</div><div class="body">
+      return `<div class="card"><div class="thumb"><img src="${r.img}" alt="${r.name}" loading="lazy"></div><div class="body">
         <h3>${r.name}</h3>
         <div class="meta">${r.type} · Up to ${r.cap} guest(s) · <span class="rating">★ ${r.rating.toFixed(1)}</span></div>
         <div class="amen">${r.amen.map(a => `<span>${a}</span>`).join('')}</div>
