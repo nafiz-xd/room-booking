@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Room Booking — Hotel & Guest House Rooms</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:#0a1f2e; color:#e0f2fe; min-height:100vh; padding-bottom:60px; }
+  .wrap { max-width:1060px; margin:0 auto; padding:0 16px; }
+  header { padding:30px 0 8px; text-align:center; }
+  h1 { font-size:30px; }
+  h1 span { color:#38bdf8; }
+  .sub { color:#7dd3fc; margin-top:6px; font-size:14.5px; }
+  .bar { background:#0f2d42; border:1px solid #1c4a68; border-radius:14px; padding:16px; display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin:20px 0; }
+  label { display:block; font-size:12.5px; color:#7dd3fc; margin-bottom:5px; }
+  input, select { width:100%; padding:10px; border-radius:9px; border:1px solid #1c4a68; background:#0a1f2e; color:#e0f2fe; font-size:14.5px; }
+  .nights { text-align:center; font-size:14px; color:#bae6fd; margin-bottom:14px; }
+  .nights b { color:#38bdf8; font-size:17px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+  .card { background:#0f2d42; border:1px solid #1c4a68; border-radius:14px; overflow:hidden; transition:transform .15s, border-color .15s; }
+  .card:hover { transform:translateY(-4px); border-color:#38bdf8; }
+  .thumb { font-size:64px; text-align:center; padding:22px 0 14px; background:linear-gradient(160deg,#123a54,#0a1f2e); }
+  .body { padding:16px 18px 18px; }
+  .body h3 { font-size:18px; }
+  .meta { color:#7dd3fc; font-size:13px; margin:4px 0 8px; }
+  .amen { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+  .amen span { font-size:11.5px; background:#0a1f2e; border:1px solid #1c4a68; padding:2px 8px; border-radius:999px; color:#bae6fd; }
+  .price-row { display:flex; justify-content:space-between; align-items:center; }
+  .price { font-size:20px; font-weight:800; }
+  .price small { color:#7dd3fc; font-weight:400; font-size:12.5px; }
+  .book { background:#0284c7; color:#fff; border:none; padding:10px 18px; border-radius:9px; font-weight:700; cursor:pointer; }
+  .rating { color:#fbbf24; font-size:13px; }
+  .empty { text-align:center; color:#7dd3fc; padding:40px 0; grid-column:1/-1; }
+  h2.sec { font-size:21px; margin:30px 0 12px; }
+  .booking { background:#0f2d42; border:1px solid #1c4a68; border-left:4px solid #38bdf8; border-radius:10px; padding:14px 16px; margin-bottom:10px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .booking .t { font-weight:700; }
+  .booking .d { color:#7dd3fc; font-size:13px; }
+  .cancel { background:#7f1d1d; color:#fecaca; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-weight:700; height:fit-content; }
+  /* modal */
+  .overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; z-index:40; align-items:center; justify-content:center; padding:16px; }
+  .overlay.open { display:flex; }
+  .modal { background:#0f2d42; border:1px solid #1c4a68; border-radius:16px; max-width:440px; width:100%; padding:24px; max-height:92vh; overflow-y:auto; }
+  .modal h2 { font-size:20px; margin-bottom:4px; }
+  .sumrow { display:flex; justify-content:space-between; padding:5px 0; font-size:14.5px; }
+  .sumrow.total { border-top:2px solid #38bdf8; margin-top:8px; padding-top:10px; font-weight:800; font-size:16.5px; }
+  .modal input { margin-bottom:10px; }
+  .confirm { width:100%; padding:12px; background:#0284c7; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:15.5px; cursor:pointer; margin-top:8px; }
+  .ghost { width:100%; padding:11px; background:none; color:#7dd3fc; border:1px solid #1c4a68; border-radius:10px; font-weight:700; cursor:pointer; margin-top:8px; }
+  .success { text-align:center; }
+  .success .big { font-size:52px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🏨 Room <span>Booking</span></h1>
+    <p class="sub">Sea Pearl Guest House · Cox's Bazar — pick your dates and book in under a minute. (Demo)</p>
+  </header>
+
+  <div class="bar">
+    <div><label>Check-in</label><input type="date" id="checkin" onchange="onDates()"></div>
+    <div><label>Check-out</label><input type="date" id="checkout" onchange="onDates()"></div>
+    <div><label>Guests</label>
+      <select id="guests" onchange="render()">
+        <option value="1">1 guest</option><option value="2" selected>2 guests</option>
+        <option value="3">3 guests</option><option value="4">4 guests</option><option value="6">5+ guests</option>
+      </select></div>
+    <div><label>Room type</label>
+      <select id="typeFilter" onchange="render()">
+        <option value="All">All types</option><option>AC</option><option>Non-AC</option><option>Family</option><option>Suite</option>
+      </select></div>
+    <div><label>Sort by</label>
+      <select id="sort" onchange="render()">
+        <option value="popular">Most popular</option>
+        <option value="low">Price: Low → High</option>
+        <option value="high">Price: High → Low</option>
+      </select></div>
+  </div>
+  <div class="nights" id="nightsInfo"></div>
+
+  <div class="grid" id="grid"></div>
+
+  <h2 class="sec">📋 My Bookings</h2>
+  <div id="myBookings"></div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+  const ROOMS = [
+    { id: 1, name: 'Deluxe AC Room', type: 'AC', price: 3200, cap: 2, rating: 4.8, emoji: '🛏️', amen: ['AC', 'WiFi', 'TV', 'Sea view', 'Breakfast'] },
+    { id: 2, name: 'Standard Non-AC Room', type: 'Non-AC', price: 1500, cap: 2, rating: 4.3, emoji: '🛏️', amen: ['Fan', 'WiFi', 'TV'] },
+    { id: 3, name: 'Family AC Room', type: 'Family', price: 4800, cap: 5, rating: 4.9, emoji: '👨‍👩‍👧‍👦', amen: ['AC', 'WiFi', 'TV', '2 beds', 'Breakfast', 'Sea view'] },
+    { id: 4, name: 'Couple AC Room', type: 'AC', price: 2600, cap: 2, rating: 4.6, emoji: '💑', amen: ['AC', 'WiFi', 'TV', 'Balcony'] },
+    { id: 5, name: 'Budget Non-AC Room', type: 'Non-AC', price: 1000, cap: 1, rating: 4.1, emoji: '🛏️', amen: ['Fan', 'WiFi'] },
+    { id: 6, name: 'Premium Suite', type: 'Suite', price: 7500, cap: 4, rating: 5.0, emoji: '👑', amen: ['AC', 'WiFi', 'TV', 'Sea view', 'Breakfast', 'Living room', 'Bathtub'] },
+    { id: 7, name: 'Family Non-AC Room', type: 'Family', price: 2800, cap: 6, rating: 4.4, emoji: '👨‍👩‍👧‍👦', amen: ['Fan', 'WiFi', 'TV', '2 beds'] },
+    { id: 8, name: 'Twin AC Room', type: 'AC', price: 3400, cap: 3, rating: 4.7, emoji: '🛏️', amen: ['AC', 'WiFi', 'TV', '2 beds', 'Breakfast'] }
+  ];
+  const fmt = n => '৳' + n.toLocaleString('en-IN');
+  const today = new Date();
+  const iso = d => d.toISOString().slice(0, 10);
+  const ciEl = document.getElementById('checkin'), coEl = document.getElementById('checkout');
+  ciEl.min = iso(today); ciEl.value = iso(new Date(Date.now() + 7 * 864e5));
+  coEl.value = iso(new Date(Date.now() + 9 * 864e5));
+
+  function nights() {
+    const a = new Date(ciEl.value), b = new Date(coEl.value);
+    return Math.round((b - a) / 864e5);
+  }
+  function onDates() {
+    coEl.min = iso(new Date(new Date(ciEl.value).getTime() + 864e5));
+    if (nights() < 1) { coEl.value = iso(new Date(new Date(ciEl.value).getTime() + 864e5)); }
+    render();
+  }
+  function priceFor(room) {
+    const n = Math.max(nights(), 1);
+    const sub = room.price * n;
+    const service = Math.round(sub * 0.05);
+    return { n, sub, service, total: sub + service };
+  }
+  function render() {
+    const guests = +document.getElementById('guests').value;
+    const type = document.getElementById('typeFilter').value;
+    const sort = document.getElementById('sort').value;
+    const n = nights();
+    document.getElementById('nightsInfo').innerHTML = n >= 1
+      ? `Your stay: <b>${n} night(s)</b> · ${ciEl.value} → ${coEl.value} · Prices below include 5% service charge`
+      : 'Please pick a valid check-out date after check-in.';
+    let list = ROOMS.filter(r => r.cap >= guests && (type === 'All' || r.type === type));
+    if (sort === 'low') list.sort((a, b) => a.price - b.price);
+    else if (sort === 'high') list.sort((a, b) => b.price - a.price);
+    else list.sort((a, b) => b.rating - a.rating);
+    document.getElementById('grid').innerHTML = list.length ? list.map(r => {
+      const p = priceFor(r);
+      return `<div class="card"><div class="thumb">${r.emoji}</div><div class="body">
+        <h3>${r.name}</h3>
+        <div class="meta">${r.type} · Up to ${r.cap} guest(s) · <span class="rating">★ ${r.rating.toFixed(1)}</span></div>
+        <div class="amen">${r.amen.map(a => `<span>${a}</span>`).join('')}</div>
+        <div class="price-row"><div class="price">${fmt(r.price)}<small> /night</small><div style="font-size:12.5px;color:#7dd3fc">${fmt(p.total)} for ${p.n} night(s)</div></div>
+        <button class="book" onclick="openBooking(${r.id})">Book Now</button></div>
+      </div></div>`;
+    }).join('') : '<div class="empty">No rooms match your search. Try fewer guests or another type.</div>';
+    renderBookings();
+  }
+  let currentRoom = null;
+  function openBooking(id) {
+    currentRoom = ROOMS.find(r => r.id === id);
+    const p = priceFor(currentRoom);
+    document.getElementById('modalContent').innerHTML = `
+      <h2>${currentRoom.name}</h2>
+      <p style="color:#7dd3fc;font-size:13.5px;margin-bottom:12px">${ciEl.value} → ${coEl.value} · ${p.n} night(s)</p>
+      <div class="sumrow"><span>Room (${fmt(currentRoom.price)} × ${p.n})</span><span>${fmt(p.sub)}</span></div>
+      <div class="sumrow"><span>Service charge (5%)</span><span>${fmt(p.service)}</span></div>
+      <div class="sumrow total"><span>Total</span><span>${fmt(p.total)}</span></div>
+      <div style="margin-top:16px">
+        <input id="bkName" placeholder="Your name" style="width:100%">
+        <input id="bkPhone" placeholder="Phone number" style="width:100%">
+      </div>
+      <button class="confirm" onclick="confirmBooking()">Confirm Booking</button>
+      <button class="ghost" onclick="closeModal()">Cancel</button>`;
+    document.getElementById('overlay').classList.add('open');
+  }
+  function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+  function getBookings() { try { return JSON.parse(localStorage.getItem('rb-bookings')) || []; } catch (e) { return []; } }
+  function confirmBooking() {
+    const name = document.getElementById('bkName').value.trim();
+    const phone = document.getElementById('bkPhone').value.trim();
+    if (!name || !phone) { alert('Please enter your name and phone number.'); return; }
+    const p = priceFor(currentRoom);
+    const booking = {
+      id: 'RB-' + Math.floor(10000 + Math.random() * 90000),
+      room: currentRoom.name, name, phone,
+      checkin: ciEl.value, checkout: coEl.value, nights: p.n, total: p.total
+    };
+    const all = getBookings(); all.unshift(booking);
+    try { localStorage.setItem('rb-bookings', JSON.stringify(all)); } catch (e) {}
+    document.getElementById('modalContent').innerHTML = `
+      <div class="success"><div class="big">🎉</div>
+      <h2 style="margin:8px 0">Booking Confirmed!</h2>
+      <p style="color:#bae6fd">Booking ID: <b>${booking.id}</b></p>
+      <p style="color:#7dd3fc;font-size:14px;margin-top:6px">${booking.room}<br>${booking.checkin} → ${booking.checkout} · ${booking.nights} night(s)<br>Total: <b style="color:#e0f2fe">${fmt(booking.total)}</b> (pay at check-in)</p>
+      <button class="confirm" onclick="closeModal(); renderBookings();">Done</button></div>`;
+    render();
+  }
+  function cancelBooking(id) {
+    const all = getBookings().filter(b => b.id !== id);
+    try { localStorage.setItem('rb-bookings', JSON.stringify(all)); } catch (e) {}
+    renderBookings();
+  }
+  function renderBookings() {
+    const all = getBookings();
+    document.getElementById('myBookings').innerHTML = all.length ? all.map(b => `
+      <div class="booking"><div><div class="t">${b.room} · ${b.id}</div>
+      <div class="d">${b.checkin} → ${b.checkout} · ${b.nights} night(s) · ${b.name} · ${b.phone}</div></div>
+      <div style="display:flex;gap:10px;align-items:center"><b>${fmt(b.total)}</b>
+      <button class="cancel" onclick="cancelBooking('${b.id}')">Cancel</button></div></div>`).join('')
+      : '<p style="color:#7dd3fc">No bookings yet — book a room above and it will appear here.</p>';
+  }
+  render();
+</script>
+</body>
+</html>
